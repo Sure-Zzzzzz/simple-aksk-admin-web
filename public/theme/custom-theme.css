@@ -1,0 +1,17 @@
+/*
+ * 业务方自定义主题覆盖口子。
+ * 覆盖下面 CSS 变量即可替换品牌色、背景色、边框、文字和阴影，不需要改 Vue 代码。
+ */
+
+/*
+:root {
+  --iam-primary: #7c3aed;
+  --iam-bg: #f8f5ff;
+  --iam-surface: #ffffff;
+  --iam-surface-soft: #ede9fe;
+  --iam-border: #ddd6fe;
+  --iam-text: #24133f;
+  --iam-muted: #6b5a85;
+  --iam-shadow: 0 16px 40px rgba(124, 58, 237, 0.14);
+}
+*/
