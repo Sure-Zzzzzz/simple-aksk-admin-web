@@ -71,38 +71,12 @@
   gap: 10px;
 }
 
-.admin-page-actions button,
-.table-actions .table-action {
+.admin-page-actions button {
   align-items: center;
   display: inline-flex;
   gap: 7px;
   justify-content: center;
 }
-
-.table-action {
-  border-radius: var(--iam-radius-control);
-  cursor: pointer;
-  font-weight: 700;
-  min-height: 38px;
-  padding: 8px 12px;
-  background: var(--iam-surface);
-  border: 1px solid var(--iam-border);
-  color: var(--iam-text);
-}
-
-.table-action:hover {
-  background: var(--iam-surface-soft);
-  border-color: var(--iam-primary);
-  color: var(--iam-primary);
-}
-
-.table-action.danger {
-  background: var(--iam-danger-bg);
-  border: 1px solid transparent;
-  color: var(--iam-danger);
-}
-
-.table-action.danger:hover { border-color: var(--iam-danger); }
 
 .admin-data-surface {
   background: var(--iam-surface);
@@ -144,7 +118,9 @@
   margin: 5px 0 0;
 }
 
-.filter-bar { border-bottom: none; flex-wrap: wrap; justify-content: flex-start; padding: 0 0 14px; }
+.filter-bar { border-bottom: none; flex-wrap: wrap; justify-content: flex-start; padding: 14px 22px; }
+/* 筛选区动作组恒靠右（对齐 IAM 查询/重置布局）；换行时独占一行仍右贴 */
+.filter-bar .admin-page-actions { margin-left: auto; }
 .filter-bar input[type="search"] { min-width: 260px; }
 .filter-bar .form-select { flex: none; width: auto; }
 .filter-bar .form-select-toggle { min-width: 120px; width: auto; }
@@ -203,11 +179,8 @@
   color: var(--iam-surface);
 }
 
-.responsive-table { overflow-x: auto; }
 
-.responsive-table table { min-width: 680px; }
 
-.responsive-table tbody tr:hover td { background: color-mix(in srgb, var(--iam-surface-soft) 58%, transparent); }
 
 .table-primary-action {
   background: transparent;
@@ -223,33 +196,36 @@
 .table-primary-action strong { font-size: 14px; }
 .table-primary-action span { color: var(--iam-muted); font-size: 12px; }
 .table-actions { text-align: right !important; white-space: nowrap; }
-.table-actions .table-action + .table-action { margin-left: 6px; }
-.table-empty { color: var(--iam-muted); padding: 28px 0; text-align: center; }
-
-.status-badge {
-  background: var(--iam-info-bg);
+/* DataTable 插槽内操作列容器：对齐语义替代原 td.table-actions */
+.table-actions-inline { display: flex; gap: 8px; justify-content: flex-end; white-space: nowrap; }
+/* 列表行内 ID+复制按钮排布：主操作按钮不被复制钮挤压换行 */
+.client-cell { align-items: center; display: flex; gap: 4px; min-width: 0; }
+.client-cell .table-primary-action { flex: 1 1 auto; min-width: 0; }
+.client-cell .token-id { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 行内幽灵复制钮：胶囊样式与表格密度匹配，悬停转主色、复制成功转绿 */
+.copy-ghost {
+  align-items: center;
+  background: var(--iam-surface);
+  border: 1px solid var(--iam-border);
   border-radius: 999px;
-  color: var(--iam-info);
+  color: var(--iam-muted);
+  cursor: pointer;
   display: inline-flex;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 5px 9px;
+  flex: 0 0 auto;
+  height: 24px;
+  justify-content: center;
+  padding: 0 6px;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
+.copy-ghost:hover { border-color: var(--iam-primary); color: var(--iam-primary); background: var(--iam-surface); }
+.copy-ghost.copied { border-color: var(--iam-success); color: var(--iam-success); }
+.table-actions .table-action + 
 
-.status-badge.success { background: var(--iam-success-bg); color: var(--iam-success); }
-.status-badge.warning { background: var(--iam-warning-bg); color: var(--iam-warning); }
-.status-badge.danger { background: var(--iam-danger-bg); color: var(--iam-danger); }
-.status-badge.neutral { background: var(--iam-surface-soft); color: var(--iam-muted); }
 
-.metric-cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-.metric-card { background: var(--iam-surface); border: 1px solid var(--iam-border); border-radius: var(--iam-radius-card); box-shadow: var(--iam-shadow); display: grid; gap: 6px; padding: 18px 20px; }
-.metric-card .metric-label { align-items: center; color: var(--iam-muted); display: flex; font-size: 13px; font-weight: 700; gap: 7px; }
-.metric-card .metric-label .dashboard-icon { color: var(--iam-primary); height: 17px; width: 17px; }
-.metric-card strong { color: var(--iam-text); font-size: 30px; line-height: 1; }
-.metric-card p { color: var(--iam-muted); font-size: 12px; margin: 0; }
 .dashboard-icon { flex: none; height: 20px; width: 20px; }
 
-.admin-empty-state { align-content:center; align-items:center; background:var(--iam-surface); border:1px dashed var(--iam-border); border-radius:var(--iam-radius-card); display:grid; justify-items:center; min-height:max(320px, calc(100vh - 360px)); padding:28px; text-align:center; }
+/* admin-empty-state 基线走契约（1.0.5 收编）；本地仅保留视口高度扩展 */
+.admin-empty-state { min-height: max(320px, calc(100vh - 360px)); }
 .admin-empty-state > .dashboard-icon { color:var(--iam-primary); height:52px; width:52px; }
 .admin-empty-state h2 { font-size:18px; margin:20px 0 8px; }
 .admin-empty-state p { color:var(--iam-muted); font-size:14px; margin:0; max-width:400px; }
@@ -337,27 +313,6 @@
   .inline-form-row { grid-template-columns: 1fr; }
   .admin-message { right: 16px; top: 76px; }
   .self-credentials-notice { align-items: flex-start; flex-wrap: wrap; }
-/* 列表行内 ID+复制按钮排布：主操作按钮不被复制钮挤压换行 */
-.client-cell { align-items: center; display: flex; gap: 4px; min-width: 0; }
-.client-cell .table-primary-action { flex: 1 1 auto; min-width: 0; }
-.client-cell .token-id { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* 行内幽灵复制钮：无框无边只有图标，悬停轻提示，与表格密度匹配 */
-.copy-ghost {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  color: var(--iam-muted, var(--iam-text, #98a2b3));
-  cursor: pointer;
-  display: inline-flex;
-  flex: 0 0 auto;
-  height: 26px;
-  justify-content: center;
-  padding: 0 3px;
-  transition: color 0.15s ease, background 0.15s ease;
-}
-.copy-ghost:hover { background: var(--iam-surface-soft, rgba(16, 24, 40, 0.04)); color: var(--iam-primary, #1f6feb); }
-.copy-ghost.copied { color: var(--iam-success, #12b76a); }
   .self-credentials-dialog { align-items: flex-end; padding: 10px; }
   .self-credentials-dialog-card { max-height: calc(100vh - 20px); overflow: auto; }
 }
@@ -435,31 +390,14 @@ textarea {
   margin: 4px 0 0;
 }
 
+/* admin-message 基线与配色走契约（1.0.5 收编）；此处仅宿主布局覆写：悬浮 toast 定位 */
 .admin-message {
-  background: var(--iam-info-bg);
-  border: 1px solid var(--iam-info);
-  border-radius: var(--iam-radius-control);
   box-shadow: var(--iam-shadow-overlay);
-  color: var(--iam-info);
-  margin: 0;
   max-width: min(420px, calc(100vw - 32px));
-  padding: 12px 14px;
   position: fixed;
   right: 24px;
   top: 92px;
   z-index: 100;
-}
-
-.admin-message.error {
-  background: var(--iam-danger-bg);
-  border-color: var(--iam-danger);
-  color: var(--iam-danger);
-}
-
-.admin-message.success {
-  background: var(--iam-success-bg);
-  border-color: var(--iam-success);
-  color: var(--iam-success);
 }
 
 .admin-message-dismiss {

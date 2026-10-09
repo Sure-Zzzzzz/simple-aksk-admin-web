@@ -2,8 +2,9 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Check, Copy, KeyRound, Pencil, Plus, RefreshCw, ShieldCheck, Trash2, X } from 'lucide-vue-next';
 import AkskPageHeader from '../components/AkskPageHeader.vue';
-import ConfirmDialog from '../components/ConfirmDialog.vue';
+import Dialog from '@sure-zzzzzz/simple-iam-theme-contract/Dialog';
 import FormSelect, { type FormSelectOption } from '@sure-zzzzzz/simple-iam-theme-contract/FormSelect';
+import DataTable, { type DataTableColumn } from '@sure-zzzzzz/simple-iam-theme-contract/DataTable';
 import {
   createMyAkskClient,
   listMyAkskCandidateApplications,
@@ -14,6 +15,14 @@ import {
   type AkskCandidateApplication,
   type AkskClientInfo
 } from '../api/akskAuth';
+
+const credentialColumns: DataTableColumn[] = [
+  { key: 'clientName', label: '凭证' },
+  { key: 'targetApplication', label: '目标业务应用' },
+  { key: 'enabled', label: '状态' },
+  { key: 'clientIdIssuedAt', label: '创建时间' },
+  { key: 'actions', label: '操作', align: 'right' },
+];
 
 const clients = ref<AkskClientInfo[]>([]);
 const candidates = ref<AkskCandidateApplication[]>([]);
@@ -274,41 +283,41 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown));
           <p>凭证仅用于当前账号访问已授权的业务应用。</p>
         </div>
       </div>
-      <div class="responsive-table self-credentials-table">
-        <table>
-          <thead>
-            <tr><th>凭证</th><th>目标业务应用</th><th>状态</th><th>创建时间</th><th class="table-actions">操作</th></tr>
-          </thead>
-          <tbody>
-            <tr v-for="client in clients" :key="client.clientId">
-              <td>
-                <div v-if="editingClientId === client.clientId" class="rename-cell">
-                  <input v-model="editingName" maxlength="128" aria-label="凭证名称" @keyup.enter="saveRename(client)">
-                  <button class="table-action" type="button" :disabled="pending" @click="saveRename(client)">保存</button>
-                  <button class="table-action" type="button" @click="editingClientId = ''">取消</button>
-                </div>
-                <div v-else class="table-primary-action">
-                  <strong>{{ client.clientName }}</strong>
-                </div>
-              </td>
-              <td><span class="muted-inline">{{ applicationLabel(client.targetApplicationId) }}</span></td>
-              <td><span class="status-badge" :class="client.enabled ? 'success' : 'warning'">{{ client.enabled ? '可用' : '已停用' }}</span></td>
-              <td>{{ formatDateTime(client.clientIdIssuedAt) }}</td>
-              <td class="table-actions">
-                <button class="table-action" type="button" :disabled="pending || !client.enabled" @click="rotate(client)">
-                  <RefreshCw :size="14" aria-hidden="true" />轮换密钥
-                </button>
-                <button class="table-action" type="button" :disabled="pending" @click="beginRename(client)">
-                  <Pencil :size="14" aria-hidden="true" />重命名
-                </button>
-                <button class="table-action danger" type="button" :disabled="pending" @click="confirmClient = client">
-                  <Trash2 :size="14" aria-hidden="true" />撤销
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        class="self-credentials-table"
+        :columns="credentialColumns"
+        :rows="clients"
+        row-key="clientId"
+        :loading="pending && !clients.length"
+        empty-text="还没有凭证：点击右上角新建。"
+      >
+        <template #cell-clientName="{ row }">
+          <div v-if="editingClientId === row.clientId" class="rename-cell">
+            <input v-model="editingName" maxlength="128" aria-label="凭证名称" @keyup.enter="saveRename(row)">
+            <button class="table-action" type="button" :disabled="pending" @click="saveRename(row)">保存</button>
+            <button class="table-action" type="button" @click="editingClientId = ''">取消</button>
+          </div>
+          <div v-else class="table-primary-action">
+            <strong>{{ row.clientName }}</strong>
+          </div>
+        </template>
+        <template #cell-targetApplication="{ row }"><span class="muted-inline">{{ applicationLabel(row.targetApplicationId) }}</span></template>
+        <template #cell-enabled="{ row }"><span class="status-badge" :class="row.enabled ? 'success' : 'warning'">{{ row.enabled ? '可用' : '已停用' }}</span></template>
+        <template #cell-clientIdIssuedAt="{ row }">{{ formatDateTime(row.clientIdIssuedAt) }}</template>
+        <template #cell-actions="{ row }">
+          <div class="table-actions-inline">
+            <button class="table-action" type="button" :disabled="pending || !row.enabled" @click="rotate(row)">
+              <RefreshCw :size="14" aria-hidden="true" />轮换密钥
+            </button>
+            <button class="table-action" type="button" :disabled="pending" @click="beginRename(row)">
+              <Pencil :size="14" aria-hidden="true" />重命名
+            </button>
+            <button class="table-action danger" type="button" :disabled="pending" @click="confirmClient = row">
+              <Trash2 :size="14" aria-hidden="true" />撤销
+            </button>
+          </div>
+        </template>
+      </DataTable>
     </section>
 
     <div v-if="showCreate" class="self-credentials-dialog" role="dialog" aria-modal="true" aria-labelledby="create-credential-title">
@@ -330,7 +339,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown));
       </div>
     </div>
 
-    <ConfirmDialog
+    <Dialog
       v-if="confirmClient"
       :open="true"
       title="撤销访问凭证"

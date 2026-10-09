@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import AkskPageHeader from '../components/AkskPageHeader.vue';
 import CopyButton from '../components/CopyButton.vue';
 import Pagination from '@sure-zzzzzz/simple-iam-theme-contract/Pagination';
+import DataTable, { type DataTableColumn } from '@sure-zzzzzz/simple-iam-theme-contract/DataTable';
 import {
   listAkskClients,
   updateAkskClient,
@@ -11,6 +12,15 @@ import {
 } from '../api/akskAuth';
 
 const router = useRouter();
+
+const clientColumns: DataTableColumn[] = [
+  { key: 'clientId', label: '客户端' },
+  { key: 'clientType', label: '类型' },
+  { key: 'ownerLabel', label: '归属' },
+  { key: 'enabled', label: '状态' },
+  { key: 'clientIdIssuedAt', label: '签发时间' },
+  { key: 'actions', label: '操作', align: 'right' },
+];
 
 const clients = ref<AkskClientInfo[]>([]);
 const loading = ref(false);
@@ -155,59 +165,48 @@ onMounted(() => {
           {{ tab.label }}
         </button>
       </div>
-      <div class="responsive-table">
-        <table>
-          <thead>
-            <tr>
-              <th>客户端</th>
-              <th>类型</th>
-              <th>归属</th>
-              <th>状态</th>
-              <th>签发时间</th>
-              <th class="table-actions">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="client in clients" :key="client.clientId">
-              <td>
-                <div class="client-cell">
-                  <button class="table-primary-action" type="button" @click="router.push(`/clients/${encodeURIComponent(client.clientId)}`)">
-                    <strong>{{ client.clientName }}</strong>
-                    <span>{{ client.clientId }}</span>
-                  </button>
-                  <CopyButton :value="client.clientId" label="AK" ghost />
-                </div>
-              </td>
-              <td>
-                <span class="status-badge" :class="client.clientType === 1 ? '' : 'warning'">
-                  {{ client.clientType === 1 ? 'AKP 平台级' : 'AKU 用户级' }}
-                </span>
-              </td>
-              <td>{{ ownerLabel(client) }}</td>
-              <td>
-                <span class="status-badge" :class="client.enabled ? 'success' : 'neutral'">
-                  {{ client.enabled ? '启用' : '禁用' }}
-                </span>
-              </td>
-              <td>{{ formatDateTime(client.clientIdIssuedAt) }}</td>
-              <td class="table-actions">
-                <button class="table-action" type="button" @click="router.push(`/authorizations/${encodeURIComponent(client.clientId)}`)">配授权</button>
-                <button
-                  class="table-action"
-                  type="button"
-                  :disabled="togglePendingClientId === client.clientId"
-                  @click="toggleClient(client)"
-                >
-                  {{ client.enabled ? '禁用' : '启用' }}
-                </button>
-              </td>
-            </tr>
-            <tr v-if="!clients.length && !loading">
-              <td colspan="6"><div class="table-empty">暂无符合条件的客户端。</div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        :columns="clientColumns"
+        :rows="clients"
+        row-key="clientId"
+        :loading="loading"
+        empty-text="暂无符合条件的客户端。"
+      >
+        <template #cell-clientId="{ row }">
+          <div class="client-cell">
+            <button class="table-primary-action" type="button" @click="router.push(`/clients/${encodeURIComponent(row.clientId)}`)">
+              <strong>{{ row.clientName }}</strong>
+              <span>{{ row.clientId }}</span>
+            </button>
+            <CopyButton :value="row.clientId" label="AK" ghost />
+          </div>
+        </template>
+        <template #cell-clientType="{ row }">
+          <span class="status-badge" :class="row.clientType === 1 ? '' : 'warning'">
+            {{ row.clientType === 1 ? 'AKP 平台级' : 'AKU 用户级' }}
+          </span>
+        </template>
+        <template #cell-ownerLabel="{ row }">{{ ownerLabel(row) }}</template>
+        <template #cell-enabled="{ row }">
+          <span class="status-badge" :class="row.enabled ? 'success' : 'neutral'">
+            {{ row.enabled ? '启用' : '禁用' }}
+          </span>
+        </template>
+        <template #cell-clientIdIssuedAt="{ row }">{{ formatDateTime(row.clientIdIssuedAt) }}</template>
+        <template #cell-actions="{ row }">
+          <div class="table-actions-inline">
+            <button class="table-action" type="button" @click="router.push(`/authorizations/${encodeURIComponent(row.clientId)}`)">配授权</button>
+            <button
+              class="table-action"
+              type="button"
+              :disabled="togglePendingClientId === row.clientId"
+              @click="toggleClient(row)"
+            >
+              {{ row.enabled ? '禁用' : '启用' }}
+            </button>
+          </div>
+        </template>
+      </DataTable>
       <Pagination
         v-if="totalElements > 0"
         :current="currentPage"

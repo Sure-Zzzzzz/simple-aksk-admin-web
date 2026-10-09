@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { Check, Copy } from 'lucide-vue-next';
 import CopyButton from '../components/CopyButton.vue';
 import AkskPageHeader from '../components/AkskPageHeader.vue';
-import ConfirmDialog from '../components/ConfirmDialog.vue';
+import Dialog from '@sure-zzzzzz/simple-iam-theme-contract/Dialog';
 import {
   deleteAkskClient,
   getAkskClient,
@@ -287,7 +287,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <ConfirmDialog
+      <Dialog
         :open="deleteConfirmOpen"
         title="删除客户端"
         :description="`将删除客户端 ${client?.clientId ?? ''}：该客户端下所有令牌将被撤销，删除后不可恢复。确定删除？`"

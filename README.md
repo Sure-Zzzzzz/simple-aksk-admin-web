@@ -28,11 +28,11 @@ AKSK 接入 IAM 的可信应用注册、字段取值和验收顺序见 [可信�
 
 | 依赖 | 版本 | 说明 |
 | --- | --- | --- |
-| AKSK Admin Web | 1.0.0 | 首发管理端，验收基线为下列完整组合 |
+| AKSK Admin Web | 1.0.1 | 管理端，验收基线为下列完整组合；1.0.1 = 主题契约 1.0.5 适配 + 门户走查修复 |
 | AKSK Server / Contract | 3.2.1 | 门户形态须外插 `simple-iam-resource-server-starter` 1.0.0 并配置受控验证，`/api/**` 才接受 IAM 人员令牌 |
 | IAM Server / Contract | 1.3.0 | 提供 PKCE 协议端点和 IAM 人员令牌验证来源；不是本应用源码依赖 |
 | `simple-iam-aksk-collaboration-starter` | 1.0.0 | AKSK 服务端的 OWNER_INHERITED 所属人授权协作适配器 |
-| `@sure-zzzzzz/simple-iam-theme-contract` | 1.0.3 | 三主题 CSS 变量与基础组件（按钮/分页/抽屉/对话框） |
+| `@sure-zzzzzz/simple-iam-theme-contract` | 1.0.5 | 三主题 CSS 变量与基础组件（按钮/分页/抽屉/对话框/下拉/数据表）及通用样式族 |
 | `@sure-zzzzzz/simple-frontend-contract` | 1.0.0（本地 link 构建） | Portal-子应用 props 契约 |
 
 接口契约：normal-sdks 仓库 `sdk/auth/aksk/server/contract/openapi/simple-aksk-admin-web.openapi.yaml`（管理操作与当前用户自助 AKU 操作统一维护；后端行为变更先改契约）。`/oauth2/authorize`、`/oauth2/token` 是 IAM 协议端点，不在该契约内重复定义。

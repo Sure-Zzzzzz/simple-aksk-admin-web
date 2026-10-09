@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AkskPageHeader from '../components/AkskPageHeader.vue';
-import ConfirmDialog from '../components/ConfirmDialog.vue';
+import Dialog from '@sure-zzzzzz/simple-iam-theme-contract/Dialog';
 import {
   ConflictError,
   createAkskApplicationAuthorization,
@@ -517,7 +517,7 @@ onMounted(() => {
       </form>
     </section>
 
-    <ConfirmDialog
+    <Dialog
       :open="conflictOpen"
       title="授权已被并发修改"
       description="其他会话已保存了该授权的更新版本。点击确认将重新拉取最新内容回填表单，请人工比对后再次提交。"
@@ -527,7 +527,7 @@ onMounted(() => {
       @confirm="confirmConflictReload"
     />
 
-    <ConfirmDialog
+    <Dialog
       :open="revokeConfirmOpen"
       title="撤销应用授权"
       :description="`撤销后 ${clientId} 不再向新令牌签发授权快照，该客户端全部活跃令牌一并失效。确定撤销？`"

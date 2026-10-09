@@ -3,8 +3,9 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AkskPageHeader from '../components/AkskPageHeader.vue';
 import CopyButton from '../components/CopyButton.vue';
-import ConfirmDialog from '../components/ConfirmDialog.vue';
+import Dialog from '@sure-zzzzzz/simple-iam-theme-contract/Dialog';
 import Pagination from '@sure-zzzzzz/simple-iam-theme-contract/Pagination';
+import DataTable, { type DataTableColumn } from '@sure-zzzzzz/simple-iam-theme-contract/DataTable';
 import FormSelect, { type FormSelectOption } from '@sure-zzzzzz/simple-iam-theme-contract/FormSelect';
 import {
   deleteAkskExpiredTokens,
@@ -19,6 +20,17 @@ import {
 } from '../api/akskAuth';
 
 const router = useRouter();
+
+const tokenColumns: DataTableColumn[] = [
+  { key: 'id', label: '令牌 ID' },
+  { key: 'clientId', label: '客户端' },
+  { key: 'clientTypeLabel', label: '类型' },
+  { key: 'owner', label: '归属' },
+  { key: 'status', label: '状态' },
+  { key: 'dataSource', label: '数据源' },
+  { key: 'expiry', label: '签发 / 过期' },
+  { key: 'actions', label: '操作', align: 'right' },
+];
 
 const source = ref<'mysql' | 'redis'>('mysql');
 const tokens = ref<AkskTokenInfo[]>([]);
@@ -295,76 +307,63 @@ onMounted(() => {
           <button class="button-primary" type="button" :disabled="loading" @click="searchTokens">查询</button>
         </div>
       </div>
-      <div class="responsive-table">
-        <table>
-          <thead>
-            <tr>
-              <th>令牌 ID</th>
-              <th>客户端</th>
-              <th>类型</th>
-              <th>归属</th>
-              <th>状态</th>
-              <th>数据源</th>
-              <th>签发 / 过期</th>
-              <th class="table-actions">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="token in tokens" :key="token.id">
-              <td>
-                <div class="client-cell">
-                  <span class="cell-ellipsis token-id" :title="token.id">{{ token.id }}</span>
-                  <CopyButton :value="token.id" label="ID" ghost />
-                </div>
-              </td>
-              <td>
-                <div class="client-cell">
-                  <button
-                    class="table-primary-action"
-                    type="button"
-                    @click="router.push(`/clients/${encodeURIComponent(token.clientId)}`)"
-                  >
-                    <strong>{{ token.clientName || token.clientId }}</strong>
-                    <span>{{ token.clientId }}</span>
-                  </button>
-                  <CopyButton :value="token.clientId" label="AK" ghost />
-                </div>
-              </td>
-              <td>{{ token.clientType === 1 ? 'AKP' : 'AKU' }}</td>
-              <td>{{ token.ownerUsername || token.ownerUserId || '—' }}</td>
-              <td>
-                <span class="status-badge" :class="token.status === 'ACTIVE' ? 'success' : token.status === 'REVOKED' ? 'danger' : 'neutral'">
-                  {{ statusLabel(token.status) }}
-                </span>
-              </td>
-              <td><span class="status-badge neutral">{{ token.dataSource }}</span></td>
-              <td>{{ formatDateTime(token.issuedAt) }} / {{ formatDateTime(token.expiresAt) }}</td>
-              <td class="table-actions">
-                <button
-                  v-if="token.status === 'ACTIVE'"
-                  class="table-action"
-                  type="button"
-                  :disabled="rowPendingId === token.id"
-                  @click="submitRevoke(token)"
-                >
-                  撤销
-                </button>
-                <button
-                  class="table-action danger"
-                  type="button"
-                  :disabled="rowPendingId === token.id"
-                  @click="submitDelete(token)"
-                >
-                  删除
-                </button>
-              </td>
-            </tr>
-            <tr v-if="!tokens.length && !loading">
-              <td colspan="8"><div class="table-empty">暂无符合条件的令牌。</div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        :columns="tokenColumns"
+        :rows="tokens"
+        row-key="id"
+        :loading="loading"
+        empty-text="暂无符合条件的令牌。"
+      >
+        <template #cell-id="{ row }">
+          <div class="client-cell">
+            <span class="cell-ellipsis token-id" :title="row.id">{{ row.id }}</span>
+            <CopyButton :value="row.id" label="ID" ghost />
+          </div>
+        </template>
+        <template #cell-clientId="{ row }">
+          <div class="client-cell">
+            <button
+              class="table-primary-action"
+              type="button"
+              @click="router.push(`/clients/${encodeURIComponent(row.clientId)}`)"
+            >
+              <strong>{{ row.clientName || row.clientId }}</strong>
+              <span>{{ row.clientId }}</span>
+            </button>
+            <CopyButton :value="row.clientId" label="AK" ghost />
+          </div>
+        </template>
+        <template #cell-clientTypeLabel="{ row }">{{ row.clientType === 1 ? 'AKP' : 'AKU' }}</template>
+        <template #cell-owner="{ row }">{{ row.ownerUsername || row.ownerUserId || '—' }}</template>
+        <template #cell-status="{ row }">
+          <span class="status-badge" :class="row.status === 'ACTIVE' ? 'success' : row.status === 'REVOKED' ? 'danger' : 'neutral'">
+            {{ statusLabel(row.status) }}
+          </span>
+        </template>
+        <template #cell-dataSource="{ row }"><span class="status-badge neutral">{{ row.dataSource }}</span></template>
+        <template #cell-expiry="{ row }">{{ formatDateTime(row.issuedAt) }} / {{ formatDateTime(row.expiresAt) }}</template>
+        <template #cell-actions="{ row }">
+          <div class="table-actions-inline">
+            <button
+              v-if="row.status === 'ACTIVE'"
+              class="table-action"
+              type="button"
+              :disabled="rowPendingId === row.id"
+              @click="submitRevoke(row)"
+            >
+              撤销
+            </button>
+            <button
+              class="table-action danger"
+              type="button"
+              :disabled="rowPendingId === row.id"
+              @click="submitDelete(row)"
+            >
+              删除
+            </button>
+          </div>
+        </template>
+      </DataTable>
       <Pagination
         v-if="totalElements > 0"
         :current="currentPage"
@@ -375,7 +374,7 @@ onMounted(() => {
       />
     </section>
 
-    <ConfirmDialog
+    <Dialog
       :open="revokeByClientConfirmOpen"
       title="批量撤销令牌"
       :description="`将撤销客户端 ${filterForm.clientId.trim()} 名下全部有效令牌，依赖这些令牌的调用会立即失败。确定撤销？`"
